@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tensorflow
+  namespace: gpu-jobs
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: tensorflow
+    # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorflow
+    # image: nvcr.io/nvidia/tensorflow:23.08-tf2-py3
+    # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/driver
+    # image: nvcr.io/nvidia/driver:460.106.00-ubuntu20.04
+
+    ## このへんで動かないかな？
+    # EKSドキュメントの「深層学習コンテナ」
+    # https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/deep-learning-containers.html
+    # AWS Deep Learning Containersドキュメントの「Amazon EKS Setup」
+    # https://docs.aws.amazon.com/ja_jp/deep-learning-containers/latest/devguide/deep-learning-containers-eks-setup.html
+    # 同「Building AWS Deep Learning Containers Custom Images」
+    # https://docs.aws.amazon.com/ja_jp/deep-learning-containers/latest/devguide/deep-learning-containers-custom-images.html
+    # 上によると下記のコンテナイメージをbase imageに使っている
+    # image: 763104351884.dkr.ecr.us-east-1.amazonaws.com/tensorflow-training:1.15.2-gpu-py36-cu100-ubuntu18.04
+    # ↑このリポジトリについてはドキュメントの↓こちらに説明があって
+    # https://docs.aws.amazon.com/ja_jp/deep-learning-containers/latest/devguide/deep-learning-containers-images.html
+    # GitHubの↓ここに最新のtagやリポジトリの一覧がある
+    # https://github.com/aws/deep-learning-containers/blob/master/available_images.md
+    # それによるとtensorflowがGPUインスタンスで使える最新版は↓これ
+    # image: 763104351884.dkr.ecr.ap-northeast-1.amazonaws.com/tensorflow-training:2.13.0-gpu-py310-cu118-ubuntu20.04-ec2
+    # ↑が↓のようなエラーでGPUを使ってくれていないので
+    # ```text
+    # 2023-09-08 16:44:52.568063: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:199] libcuda reported version is: 520.61.5
+    # 2023-09-08 16:44:52.568116: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:203] kernel reported version is: 470.182.3
+    # 2023-09-08 16:44:52.568134: E tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:312] kernel version 470.182.3 does not match DSO version 520.61.5 -- cannot find working devices in this configuration
+    # ```
+    # cu112(CUDA Toolkit version 11.2を期待)と名前にある↓を使ってみる
+    image: 763104351884.dkr.ecr.ap-northeast-1.amazonaws.com/tensorflow-training:2.11.0-gpu-py39-cu112-ubuntu20.04-ec2
+    # ↑これでいけた！
+
+
+    command:
+    - sh
+    - -c
+    - 'while true; do sleep 3600s; done'
+    resources:
+      limits:
+        nvidia.com/gpu: 1

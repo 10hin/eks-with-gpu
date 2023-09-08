@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: gpu-osaki
+  name: gpu-run
   region: ap-northeast-1
   tags:
     Purpose: eks-with-gpu
@@ -12,22 +12,22 @@ iam:
   withOIDC: true
 
 nodeGroups:
-  # - name: gpu-powered-a
-  #   desiredCapacity: 1
-  #   instanceType: p2.xlarge
-  #   volumeSize: 20
-  #   ssh:
-  #     enableSsm: true
-  #   tags:
-  #     Purpose: eks-with-gpu
-  - name: gpu-powered-b
+  - name: gpu-powered-a
     desiredCapacity: 1
     instanceType: p2.xlarge
-    volumeSize: 20
+    volumeSize: 80
     ssh:
       enableSsm: true
     tags:
       Purpose: eks-with-gpu
+  # - name: gpu-powered-b
+  #   desiredCapacity: 1
+  #   instanceType: p2.xlarge
+  #   volumeSize: 80
+  #   ssh:
+  #     enableSsm: true
+  #   tags:
+  #     Purpose: eks-with-gpu
 
 fargateProfiles:
   - name: non-gpu
